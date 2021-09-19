@@ -6,27 +6,24 @@ import { Searchbar } from "../Searchbar/Searchbar";
 import { ImageGallery } from "../ImageGallery/ImageGallery";
 import { Button } from "../Button/Button";
 import { Modal } from "../Modal/Modal";
+import { MyLoader } from "../Loader/Loader";
 
 export class App extends Component {
   state = {
     imageName: null,
     images: [],
     page: 1,
-    isSelectedImage: false,
+    selectedImage: null,
     loading: false,
     error: null,
-    largeImageURL: null,
   };
 
-  openModal = (largeImageURL) => {
-    this.setState({ largeImageURL });
+  closeModal = () => {
+    this.setState({ selectedImage: null });
   };
 
-  closeModal = (e) => {
-    if (e.target.nodeName !== "IMG" || e.code === "Escape") {
-      this.setState({ isSelectedImage: false, largeImageURL: null});
-      window.removeEventListener("keydown", this.closeModal);
-    }
+  handleSelectedImage = (src, alt) => {
+    this.setState({ selectedImage: { src, alt } });
   };
 
   handleFormSubmit = (imageName) => {
@@ -35,28 +32,59 @@ export class App extends Component {
 
   async componentDidUpdate(_, prevState) {
     if (prevState.imageName !== this.state.imageName) {
+      this.toggleLoaderVisible();
       const images = await fetchImages(this.state.imageName);
-      if (this.state.imageName === "") {
-        toast("Enter your request!");
-      }if (!images.length) {
-        toast("No results were found for your search");
-      }
       this.setState({ images });
+      this.toggleLoaderVisible();
+    }
+    if (prevState.page !== this.state.page) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      });
     }
   }
-  
+
+  loadMore = () => {
+    this.toggleLoaderVisible();
+    setTimeout(
+      this.setState({ page: this.state.page + 1 }, () => {
+        this.handleFetchResponse();
+      }),
+      2000
+    );
+  };
+
+  handleFetchResponse = () => {
+    const { imageName, page } = this.state;
+    try {
+      fetchImages(imageName, page).then((images) => {
+        this.setState((prevState) => ({
+          images: [...prevState.images, ...images],
+        }));
+        this.toggleLoaderVisible();
+      });
+    } catch (error) {
+      alert(error);
+    }
+  };
+
+  toggleLoaderVisible = () => {
+    this.setState({ loading: !this.state.loading });
+  };
+
   render() {
-    const { images, isSelectedImage } = this.state;
-    const { tags, largeImageURL } = this.props;
+    const { images, selectedImage, loading } = this.state;
     return (
       <AppDiv>
         <Searchbar onSearch={this.handleFormSubmit} />
         {images.length > 0 && (
-          <ImageGallery images={images} onSelect={this.openModal} />
+          <ImageGallery images={images} onSelect={this.handleSelectedImage} />
         )}
-        {images.length > 0 && <Button  />}
-        {isSelectedImage && (
-          <Modal closeModal={this.closeModal} src={largeImageURL} alt={tags} />
+        {loading && <MyLoader />}
+        {images.length > 0 && <Button onClick={this.loadMore} />}
+        {selectedImage && (
+          <Modal closeModal={this.closeModal} selectedImage={selectedImage} />
         )}
         <Toaster position="top-right" />
       </AppDiv>

@@ -1,3 +1,4 @@
+@import "../node_modules/modern-normalize/modern-normalize.css";
 html {
   box-sizing: border-box;
   width: 100vw;
@@ -24,4 +25,8 @@ img {
   display: block;
   max-width: 100%;
   height: auto;
+}
+.noScroll {
+  height: 100vh;
+  overflow: hidden;
 }

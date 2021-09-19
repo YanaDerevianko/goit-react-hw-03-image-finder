@@ -11,6 +11,7 @@ export const Searchbar = ({ onSearch }) => {
   const handleSearch = (e) => {
     e.preventDefault();
     onSearch(e.target.elements.imageName.value);
+    e.target.elements.imageName.value=''
   };
 
   return (
