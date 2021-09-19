@@ -12,39 +12,52 @@ export class App extends Component {
     imageName: null,
     images: [],
     page: 1,
-    selectedImage: null,
-    showModal: false,
+    isSelectedImage: false,
+    loading: false,
+    error: null,
+    largeImageURL: null,
   };
-  handleSelectedImage = (largeImageURL) => {
-    this.setState((prevState) => ({
-      showModal: !prevState.showModal,
-      selectedImage: largeImageURL,
-    }));
+
+  openModal = (largeImageURL) => {
+    this.setState({ largeImageURL });
+  };
+
+  closeModal = (e) => {
+    if (e.target.nodeName !== "IMG" || e.code === "Escape") {
+      this.setState({ isSelectedImage: false, largeImageURL: null});
+      window.removeEventListener("keydown", this.closeModal);
+    }
   };
 
   handleFormSubmit = (imageName) => {
     this.setState({ imageName });
   };
+
   async componentDidUpdate(_, prevState) {
     if (prevState.imageName !== this.state.imageName) {
       const images = await fetchImages(this.state.imageName);
       if (this.state.imageName === "") {
         toast("Enter your request!");
-      } else if (!images.length) {
+      }if (!images.length) {
         toast("No results were found for your search");
       }
       this.setState({ images });
     }
   }
-
+  
   render() {
-    const { images, selectedImage, showModal} = this.state;
+    const { images, isSelectedImage } = this.state;
+    const { tags, largeImageURL } = this.props;
     return (
       <AppDiv>
         <Searchbar onSearch={this.handleFormSubmit} />
-        <ImageGallery images={images} onSelect={this.handleSelectedImage} />
-        {images.length > 1 && <Button onClick={5} />}
-        {this.state.selectedImage && <Modal />}
+        {images.length > 0 && (
+          <ImageGallery images={images} onSelect={this.openModal} />
+        )}
+        {images.length > 0 && <Button  />}
+        {isSelectedImage && (
+          <Modal closeModal={this.closeModal} src={largeImageURL} alt={tags} />
+        )}
         <Toaster position="top-right" />
       </AppDiv>
     );
