@@ -31,12 +31,14 @@ export class App extends Component {
   };
 
   async componentDidUpdate(_, prevState) {
+    const { images } = this.state;
     if (prevState.imageName !== this.state.imageName) {
       this.toggleLoaderVisible();
       const images = await fetchImages(this.state.imageName);
       this.setState({ images });
       this.toggleLoaderVisible();
     }
+  
     if (prevState.page !== this.state.page) {
       window.scrollTo({
         top: document.documentElement.scrollHeight,

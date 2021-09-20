@@ -8,19 +8,18 @@ export const fetchImages = async (imageName, page) => {
   return response.data.hits;
 };
 
-// const URL = "https://pixabay.com/api/";
+// const BASE_URL = "https://pixabay.com/api/";
 // const API_KEY = "18194330-67860245f678ffa703ae3a938";
 
-// axios.defaults.baseURL = URL;
+// axios.defaults.baseURL = BASE_URL;
 // axios.defaults.params = {
 //   key: API_KEY,
-//   per_page: 12,
 //   image_type: "photo",
-//   orientation: "horizontal",
+//   image_type: "photo",
+//   orientation: "horizontal"
 // };
-// export const fetchImages = async (state) => {
-//   const { imageName, page } = state;
-//   return await axios("", {
-//     params: { g: imageName, page },
-//   });
+// export const fetchImages = async ({ page, imageName }) => {
+//   return await axios.get("", {
+//     params: { page, g: imageName},
+//   })
 // };
